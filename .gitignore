@@ -7,10 +7,32 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node dependencies and build
 node_modules
 dist
 dist-ssr
 *.local
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment configurations and uploads
+.env
+.env.*
+!.env.example
+backend/.env
+backend/uploads/
+uploads/
 
 # Editor directories and files
 .vscode/*

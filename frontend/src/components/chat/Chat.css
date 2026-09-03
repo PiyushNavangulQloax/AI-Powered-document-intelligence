@@ -50,6 +50,7 @@
 .qloxa-brand-highlight {
   background: linear-gradient(135deg, #c084fc 0%, #818cf8 50%, #38bdf8 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

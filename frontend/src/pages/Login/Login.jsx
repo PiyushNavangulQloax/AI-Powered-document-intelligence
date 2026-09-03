@@ -140,6 +140,7 @@ function Login() {
               <label>Work Email</label>
               <input
                 type="email"
+                id="login-email"
                 placeholder="name@qloax.com"
                 value={email}
                 onChange={(e) => {
@@ -154,6 +155,7 @@ function Login() {
               <label>Password</label>
               <input
                 type="password"
+                id="login-password"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => {
@@ -179,10 +181,29 @@ function Login() {
               </span>
             </div>
 
-            <button type="submit" className="login-submit-btn">
+            <button type="submit" id="login-submit-btn" className="login-submit-btn">
               <span>Sign In to QLOXA AI</span>
               <ArrowRight size={16} />
             </button>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              fontSize: '13px',
+              color: '#94a3b8',
+              marginTop: '8px'
+            }}>
+              <span>Don't have an account?</span>
+              <span
+                id="go-to-register"
+                onClick={() => navigate('/register')}
+                style={{ color: '#818cf8', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Create an account
+              </span>
+            </div>
           </form>
 
           <div style={{
