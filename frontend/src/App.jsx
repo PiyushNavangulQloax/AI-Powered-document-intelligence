@@ -1,11 +1,8 @@
 import React from 'react';
+import AppRoutes from './routes/AppRoutes';
 
 function App() {
-  return (
-    <div className="app">
-      <h1>AI-Powered Document Intelligence</h1>
-    </div>
-  );
+  return <AppRoutes />;
 }
 
 export default App;

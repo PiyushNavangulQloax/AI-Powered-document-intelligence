@@ -1,0 +1,121 @@
+.stat-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: #cbd5e1;
+}
+
+.stat-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.stat-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-card-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.stat-card:hover .stat-card-icon-box {
+  transform: scale(1.05);
+}
+
+/* Color Schemes */
+.stat-card-indigo .stat-card-icon-box {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.stat-card-emerald .stat-card-icon-box {
+  background-color: var(--success-light);
+  color: var(--success);
+}
+
+.stat-card-amber .stat-card-icon-box {
+  background-color: var(--warning-light);
+  color: var(--warning);
+}
+
+.stat-card-cyan .stat-card-icon-box {
+  background-color: #ecfeff;
+  color: #0891b2;
+}
+
+.stat-card-purple .stat-card-icon-box {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+}
+
+.stat-card-value-row {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.stat-card-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.stat-card-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  font-size: 12px;
+}
+
+.stat-trend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.trend-up {
+  background-color: var(--success-light);
+  color: var(--success-text);
+}
+
+.trend-down {
+  background-color: var(--danger-light);
+  color: var(--danger-text);
+}
+
+.stat-card-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}

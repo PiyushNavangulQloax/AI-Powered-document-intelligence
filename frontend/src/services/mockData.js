@@ -1,0 +1,140 @@
+export const mockUser = {
+  name: "Samarth Sharma",
+  role: "Frontend Lead",
+  email: "samarth@docmind.ai",
+  avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
+};
+
+export const mockDashboardStats = {
+  totalDocuments: {
+    value: 28,
+    change: "+4 this week",
+    trend: "up",
+    period: "vs last month",
+  },
+  questionsAsked: {
+    value: 342,
+    change: "+18% activity",
+    trend: "up",
+    period: "vs last week",
+  },
+  storageUsed: {
+    usedMB: 48.6,
+    limitMB: 500,
+    percentage: 9.7,
+    change: "451.4 MB free",
+  },
+  indexingHealth: {
+    value: "99.8%",
+    status: "Healthy",
+    activeJobs: 2,
+    completedToday: 14,
+  },
+};
+
+export const mockPipelineStages = [
+  { id: "upload", name: "File Upload", status: "completed", description: "Binary payload verified & stored" },
+  { id: "validation", name: "File Validation", status: "completed", description: "MIME type & integrity validated" },
+  { id: "extraction", name: "Text Extraction", status: "completed", description: "PDF/DOCX layout parsing done" },
+  { id: "cleaning", name: "Text Cleaning", status: "completed", description: "Normalized whitespace & symbols" },
+  { id: "chunking", name: "Semantic Chunking", status: "completed", description: "512-token chunks with 50-token overlap" },
+  { id: "embedding", name: "Embedding Generation", status: "in-progress", description: "text-embedding-3-small (1536 dim)" },
+  { id: "indexing", name: "Vector Indexing", status: "pending", description: "Upserting vectors into database" },
+];
+
+export const mockRecentDocuments = [
+  {
+    id: "doc-101",
+    name: "Employee Handbook 2026.pdf",
+    type: "PDF",
+    size: "3.4 MB",
+    pages: 42,
+    chunks: 128,
+    status: "Processed",
+    uploadedAt: "10 minutes ago",
+    author: "HR Operations",
+  },
+  {
+    id: "doc-102",
+    name: "Leave & Remote Work Policy.docx",
+    type: "DOCX",
+    size: "1.1 MB",
+    pages: 12,
+    chunks: 36,
+    status: "Processed",
+    uploadedAt: "2 hours ago",
+    author: "People Team",
+  },
+  {
+    id: "doc-103",
+    name: "Q3 Enterprise Security Audit.pdf",
+    type: "PDF",
+    size: "8.7 MB",
+    pages: 94,
+    chunks: 310,
+    status: "Processing",
+    uploadedAt: "Just now",
+    author: "SecOps",
+  },
+  {
+    id: "doc-104",
+    name: "Engineering Onboarding Guide.txt",
+    type: "TXT",
+    size: "450 KB",
+    pages: 8,
+    chunks: 24,
+    status: "Processed",
+    uploadedAt: "Yesterday",
+    author: "Tech Leads",
+  },
+  {
+    id: "doc-105",
+    name: "Master Services Agreement (MSA).pdf",
+    type: "PDF",
+    size: "2.8 MB",
+    pages: 26,
+    chunks: 82,
+    status: "Failed",
+    uploadedAt: "2 days ago",
+    author: "Legal Dept",
+  },
+];
+
+export const mockRecentActivities = [
+  {
+    id: "act-1",
+    query: "What is the annual leave allowance for interns?",
+    user: "Alex Rivera",
+    timestamp: "5 minutes ago",
+    matchedDocs: 2,
+    sources: ["Leave & Remote Work Policy.docx", "Employee Handbook 2026.pdf"],
+    confidence: "96%",
+  },
+  {
+    id: "act-2",
+    query: "Explain HIPAA compliance data retention rules",
+    user: "Sarah Jenkins",
+    timestamp: "32 minutes ago",
+    matchedDocs: 1,
+    sources: ["Q3 Enterprise Security Audit.pdf"],
+    confidence: "91%",
+  },
+  {
+    id: "act-3",
+    query: "How do employees claim travel expenses under the new policy?",
+    user: "Michael Scott",
+    timestamp: "1 hour ago",
+    matchedDocs: 2,
+    sources: ["Employee Handbook 2026.pdf"],
+    confidence: "88%",
+  },
+  {
+    id: "act-4",
+    query: "What are the server deployment credentials in staging?",
+    user: "David Kumar",
+    timestamp: "3 hours ago",
+    matchedDocs: 1,
+    sources: ["Engineering Onboarding Guide.txt"],
+    confidence: "94%",
+  },
+];
