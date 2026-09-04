@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pymongo
+sentence-transformers
+transformers
+torch
+accelerate
+bitsandbytes
+python-dotenv
+pydantic
+python-multipart
+pypdf
+python-docx
