@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Layers, BarChart3, FileCheck, HelpCircle, Star, ArrowRight,
+  BarChart3, FileCheck, HelpCircle, Star, ArrowRight,
   Paperclip, Send, ShieldCheck, Copy, ThumbsUp, ThumbsDown,
   FileText, Sparkles, CheckCircle2, AlertTriangle, Loader2, X, Square
 } from 'lucide-react';

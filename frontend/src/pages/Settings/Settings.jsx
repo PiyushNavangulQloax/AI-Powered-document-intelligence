@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import {
   User, Shield, Palette, Bell, FileText, Lock, Info,
-  LogOut, Save, Moon, Sun, Monitor, AlertTriangle, Layers
+  LogOut, Save, Moon, Sun, Monitor, AlertTriangle
 } from 'lucide-react';
 import './Settings.css';
 
