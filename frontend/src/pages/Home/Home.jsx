@@ -60,13 +60,26 @@ function Home() {
         </nav>
 
         <div className="home-nav-actions">
-          <button className="home-btn-ghost" onClick={() => navigate('/login')}>
-            Sign In
-          </button>
-          <button className="home-btn-primary" onClick={() => navigate('/login')}>
-            <span>Get Started</span>
-            <ArrowRight size={14} />
-          </button>
+          {isAuthenticated ? (
+            <>
+              <button className="home-btn-ghost" onClick={() => navigate('/dashboard')}>
+                Dashboard
+              </button>
+              <button className="home-btn-primary" onClick={() => logout()}>
+                <span>Sign Out</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="home-btn-ghost" onClick={() => navigate('/login')}>
+                Sign In
+              </button>
+              <button className="home-btn-primary" onClick={() => navigate('/register')}>
+                <span>Create Account</span>
+                <ArrowRight size={14} />
+              </button>
+            </>
+          )}
         </div>
       </header>
 
@@ -86,10 +99,17 @@ function Home() {
         </p>
 
         <div className="hero-cta-group">
-          <button className="cta-large-btn cta-large-primary" onClick={() => navigate('/login')}>
-            <span>Sign In to QLOXA AI</span>
-            <ArrowRight size={18} />
-          </button>
+          {isAuthenticated ? (
+            <button className="cta-large-btn cta-large-primary" onClick={() => navigate('/dashboard')}>
+              <span>Go to Dashboard</span>
+              <ArrowRight size={18} />
+            </button>
+          ) : (
+            <button className="cta-large-btn cta-large-primary" onClick={() => navigate('/register')}>
+              <span>Sign Up for QLOXA AI</span>
+              <ArrowRight size={18} />
+            </button>
+          )}
 
           <button
             className="cta-large-btn cta-large-secondary"

@@ -7,7 +7,9 @@ torch
 accelerate
 bitsandbytes
 python-dotenv
-pydantic
+pydantic[email]
 python-multipart
 pypdf
 python-docx
+passlib[bcrypt]
+pyjwt

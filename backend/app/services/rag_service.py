@@ -34,7 +34,7 @@ DECISION:
         )
         return decision.upper().strip()
 
-    def generate_answer(self, query: str, document_id: str = None, top_k: int = 3) -> dict:
+    def generate_answer(self, query: str, document_id: str = None, top_k: int = 10) -> dict:
         # 1. Search MongoDB for relevant chunks
         results = search_service.vector_search(query, document_id=document_id, top_k=top_k)
 
@@ -46,17 +46,6 @@ DECISION:
             context_parts.append(f"Section: {title}\nContent: {text}")
 
         context = "\n\n".join(context_parts)
-
-        # 3. Check evidence
-        evidence = self.check_evidence(query, context)
-
-        # 4. Abort LLM answer generation if there is not enough evidence
-        if "YES" not in evidence:
-            return {
-                "answer": "I don't have enough information in the provided document.",
-                "sources": [],
-                "evidence": "NO"
-            }
 
         # 5. Build RAG prompt
         prompt = f"""

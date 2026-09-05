@@ -3,7 +3,9 @@ const API_BASE_URL = 'http://localhost:8000';
 export const documentService = {
   getDocuments: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/documents/`);
+      const user = JSON.parse(localStorage.getItem('qloxa_auth_user') || '{}');
+      const headers = user.token ? { 'Authorization': `Bearer ${user.token}` } : {};
+      const response = await fetch(`${API_BASE_URL}/api/documents/`, { headers });
       if (!response.ok) {
         throw new Error(`Failed to fetch documents: ${response.statusText}`);
       }
@@ -20,8 +22,12 @@ export const documentService = {
       const formData = new FormData();
       formData.append('file', file);
 
+      const user = JSON.parse(localStorage.getItem('qloxa_auth_user') || '{}');
+      const headers = user.token ? { 'Authorization': `Bearer ${user.token}` } : {};
+
       const response = await fetch(`${API_BASE_URL}/api/documents/upload`, {
         method: 'POST',
+        headers,
         body: formData,
       });
 
@@ -39,8 +45,12 @@ export const documentService = {
 
   deleteDocument: async (documentId) => {
     try {
+      const user = JSON.parse(localStorage.getItem('qloxa_auth_user') || '{}');
+      const headers = user.token ? { 'Authorization': `Bearer ${user.token}` } : {};
+      
       const response = await fetch(`${API_BASE_URL}/api/documents/${documentId}`, {
         method: 'DELETE',
+        headers,
       });
 
       if (!response.ok) {
@@ -57,7 +67,9 @@ export const documentService = {
 
   getDocumentChunks: async (documentId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/documents/${documentId}/chunks`);
+      const user = JSON.parse(localStorage.getItem('qloxa_auth_user') || '{}');
+      const headers = user.token ? { 'Authorization': `Bearer ${user.token}` } : {};
+      const response = await fetch(`${API_BASE_URL}/api/documents/${documentId}/chunks`, { headers });
       if (!response.ok) {
         throw new Error(`Failed to fetch chunks: ${response.statusText}`);
       }

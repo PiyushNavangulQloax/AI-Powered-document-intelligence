@@ -43,7 +43,24 @@ class SearchService:
                     }
                 }
             ]
-            return list(collection.aggregate(pipeline))
+            results = list(collection.aggregate(pipeline))
+            
+            # Heuristic: Always include the first page/chunks for document-level questions (abstract, title, etc)
+            if document_id:
+                first_chunks = list(collection.find(
+                    {"document_id": document_id, "chunk_index": {"$in": [1, 2]}},
+                    {"_id": 0, "document_id": 1, "chunk_id": 1, "title": 1, "text": 1, "page": 1}
+                ))
+                for fc in first_chunks:
+                    fc["score"] = 1.0  # Give it a high score
+                
+                # Merge while avoiding duplicates
+                seen = {r.get("chunk_id") for r in results}
+                for fc in reversed(first_chunks):
+                    if fc["chunk_id"] not in seen:
+                        results.insert(0, fc)
+            
+            return results
 
         except Exception as e:
             # Fallback if the filter field is still BUILDING in Atlas
@@ -78,7 +95,21 @@ class SearchService:
                         }
                     }
                 ]
-                return list(collection.aggregate(fallback_pipeline))
+                results = list(collection.aggregate(fallback_pipeline))
+                if document_id:
+                    first_chunks = list(collection.find(
+                        {"document_id": document_id, "chunk_index": {"$in": [1, 2]}},
+                        {"_id": 0, "document_id": 1, "chunk_id": 1, "title": 1, "text": 1, "page": 1}
+                    ))
+                    for fc in first_chunks:
+                        fc["score"] = 1.0
+                    
+                    seen = {r.get("chunk_id") for r in results}
+                    for fc in reversed(first_chunks):
+                        if fc["chunk_id"] not in seen:
+                            results.insert(0, fc)
+                
+                return results
             raise e
 
 search_service = SearchService()

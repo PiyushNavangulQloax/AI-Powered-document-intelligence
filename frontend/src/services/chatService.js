@@ -8,10 +8,14 @@ export const chatService = {
         payload.document_id = documentId;
       }
 
+      const user = JSON.parse(localStorage.getItem('qloxa_auth_user') || '{}');
+      const authHeader = user.token ? { 'Authorization': `Bearer ${user.token}` } : {};
+
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...authHeader
         },
         body: JSON.stringify(payload),
       });

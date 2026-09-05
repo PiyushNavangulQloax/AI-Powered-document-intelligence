@@ -1,8 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from typing import List, Dict, Any
 from app.services.document_service import document_service
+from app.api.auth import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 @router.post("/upload")
 async def upload_document(file: UploadFile = File(...)):

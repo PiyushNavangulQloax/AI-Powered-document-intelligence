@@ -3,8 +3,12 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 function ProtectedRoute() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
+
+  if (loading) {
+    return <div>Loading...</div>; // Could be a real spinner
+  }
 
   if (!isAuthenticated) {
     // Redirect unauthenticated users directly to login page

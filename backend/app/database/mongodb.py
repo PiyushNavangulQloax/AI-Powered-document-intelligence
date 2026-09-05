@@ -1,4 +1,5 @@
 import os
+import certifi
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
@@ -15,6 +16,11 @@ def get_db():
         raise ValueError("MONGODB_URI environment variable is not set")
         
     if _client is None:
-        _client = MongoClient(uri, serverSelectionTimeoutMS=10000)
+        _client = MongoClient(
+            uri, 
+            serverSelectionTimeoutMS=10000, 
+            tlsCAFile=certifi.where(),
+            tlsAllowInvalidCertificates=True
+        )
         
     return _client[db_name]

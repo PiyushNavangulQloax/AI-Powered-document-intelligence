@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import the routers we created
-from app.api import search, chat, documents
+from app.api import search, chat, documents, auth
 
 app = FastAPI(title="DocMind AI API")
 
@@ -20,6 +20,7 @@ app.add_middleware(
 )
 
 # Include the routers with /api prefix and root for compatibility
+app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
 app.include_router(documents.router, prefix="/documents", tags=["Documents"])
 app.include_router(search.router, prefix="/api", tags=["Search"])
