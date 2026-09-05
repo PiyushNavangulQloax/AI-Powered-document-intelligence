@@ -1,27 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Layers,
-  BarChart3,
-  FileCheck,
-  HelpCircle,
-  Star,
-  ArrowRight,
-  Paperclip,
-  Send,
-  ShieldCheck,
-  Copy,
-  ThumbsUp,
-  ThumbsDown,
-  FileText,
-  Sparkles,
-  CheckCircle2,
-  AlertTriangle,
-  Loader2,
-  X
+  Layers, BarChart3, FileCheck, HelpCircle, Star, ArrowRight,
+  Paperclip, Send, ShieldCheck, Copy, ThumbsUp, ThumbsDown,
+  FileText, Sparkles, CheckCircle2, AlertTriangle, Loader2, X, Square
 } from 'lucide-react';
-import { chatService } from '../../services/chatService';
 import { documentService } from '../../services/documentService';
+import { useChat } from '../../context/ChatContext';
 import './Chat.css';
 
 const DEFAULT_TEMPLATES = [
@@ -63,11 +48,17 @@ const ChatWindow = () => {
   const [searchParams] = useSearchParams();
   const docIdFromUrl = searchParams.get('docId');
 
+  const {
+    messages,
+    sendMessage,
+    isGenerating,
+    stopGeneration,
+    activeDocName,
+    setActiveDocName
+  } = useChat();
+
   const [documents, setDocuments] = useState([]);
-  const [selectedDocId, setSelectedDocId] = useState(docIdFromUrl || '');
-  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   const messagesEndRef = useRef(null);
@@ -80,19 +71,18 @@ const ChatWindow = () => {
         const docs = await documentService.getDocuments();
         setDocuments(docs);
         if (docIdFromUrl && docs.some((d) => d.document_id === docIdFromUrl)) {
-          setSelectedDocId(docIdFromUrl);
-        } else if (!selectedDocId && docs.length > 0) {
-          // Default to first document if available
-          setSelectedDocId(docs[0].document_id);
+          const doc = docs.find((d) => d.document_id === docIdFromUrl);
+          if (doc) setActiveDocName(doc.name);
         }
       } catch (err) {
         console.error('Failed to load documents:', err);
       }
     };
     fetchDocs();
-  }, [docIdFromUrl]);
+  }, [docIdFromUrl, setActiveDocName]);
 
-  const activeDoc = documents.find((d) => d.document_id === selectedDocId);
+  // Derive the active document object from the global activeDocName
+  const activeDoc = documents.find((d) => d.name === activeDocName);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -100,7 +90,7 @@ const ChatWindow = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isTyping]);
+  }, [messages, isGenerating]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -111,8 +101,8 @@ const ChatWindow = () => {
       const res = await documentService.uploadDocument(file);
       const docs = await documentService.getDocuments();
       setDocuments(docs);
-      if (res.document?.document_id) {
-        setSelectedDocId(res.document.document_id);
+      if (res.document?.name) {
+        setActiveDocName(res.document.name);
       }
     } catch (err) {
       alert('Failed to upload document: ' + err.message);
@@ -125,51 +115,8 @@ const ChatWindow = () => {
   const handleSend = async (textToSend) => {
     const query = textToSend || inputValue;
     if (!query.trim()) return;
-
-    const userMsg = {
-      id: Date.now().toString(),
-      sender: 'user',
-      text: query,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
     setInputValue('');
-    setIsTyping(true);
-
-    try {
-      // Real API Call to Qwen RAG backend
-      const res = await chatService.sendMessage(query, selectedDocId || null);
-
-      const citations = (res.sources || []).map((s) => ({
-        doc: s.title || s.chunk_id || activeDoc?.name || 'Document',
-        page: s.page,
-        score: s.score ? `${(s.score * 100).toFixed(1)}% Match` : null
-      }));
-
-      const aiMsg = {
-        id: (Date.now() + 1).toString(),
-        sender: 'ai',
-        text: res.answer,
-        citations: citations,
-        evidence: res.evidence,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setMessages((prev) => [...prev, aiMsg]);
-    } catch (err) {
-      const errorMsg = {
-        id: (Date.now() + 1).toString(),
-        sender: 'ai',
-        text: `Error contacting RAG service: ${err.message}. Please check if backend server is running.`,
-        citations: [],
-        evidence: 'ERROR',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages((prev) => [...prev, errorMsg]);
-    } finally {
-      setIsTyping(false);
-    }
+    await sendMessage(query, activeDoc?.document_id || null);
   };
 
   const handleKeyDown = (e) => {
@@ -192,8 +139,8 @@ const ChatWindow = () => {
 
       {/* Scoped Document Indicator Bar */}
       <div style={{
-        background: '#0d1321',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        background: 'var(--bg-surface)',
+        borderBottom: '1px solid var(--border-color)',
         padding: '10px 24px',
         display: 'flex',
         alignItems: 'center',
@@ -203,15 +150,15 @@ const ChatWindow = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <FileText size={16} style={{ color: '#818cf8' }} />
-          <span style={{ fontSize: '13px', color: '#94a3b8' }}>Active Document Scope:</span>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Active Document Scope:</span>
           
           <select
-            value={selectedDocId}
-            onChange={(e) => setSelectedDocId(e.target.value)}
+            value={activeDocName === 'All Uploaded Documents' || activeDocName === 'Select Document' ? '' : activeDocName}
+            onChange={(e) => setActiveDocName(e.target.value || 'All Uploaded Documents')}
             style={{
-              background: '#131b2e',
-              color: '#f8fafc',
-              border: '1px solid rgba(99, 102, 241, 0.3)',
+              background: 'var(--bg-input)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
               borderRadius: '6px',
               padding: '4px 10px',
               fontSize: '12.5px',
@@ -222,7 +169,7 @@ const ChatWindow = () => {
           >
             <option value="">All Uploaded Documents</option>
             {documents.map((d) => (
-              <option key={d.document_id} value={d.document_id}>
+              <option key={d.document_id} value={d.name}>
                 {d.name} ({d.chunks} chunks)
               </option>
             ))}
@@ -235,7 +182,7 @@ const ChatWindow = () => {
               Filtering only chunks in "{activeDoc.name}"
             </span>
             <button
-              onClick={() => setSelectedDocId('')}
+              onClick={() => setActiveDocName('All Uploaded Documents')}
               style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
               title="Clear Document Scope"
             >
@@ -249,7 +196,7 @@ const ChatWindow = () => {
         /* Empty Landing State */
         <div className="chat-landing-view">
           <div className="pulsing-logo-circle">
-            <Layers size={36} />
+            <img src="/logo.png" alt="DocMind AI Logo" className="chat-landing-logo-img" />
           </div>
 
           <h1 className="chat-landing-title">
@@ -293,96 +240,100 @@ const ChatWindow = () => {
       ) : (
         /* Active Messages View */
         <div className="messages-list-wrapper">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`message-row ${msg.sender === 'user' ? 'user-row' : ''}`}
-            >
-              <div className={`msg-avatar ${msg.sender === 'user' ? 'user-avatar' : 'ai-avatar'}`}>
-                {msg.sender === 'user' ? 'ME' : <Sparkles size={16} />}
-              </div>
+          {messages.map((msg, index) => {
+            const isUser = msg.role === 'user' || msg.sender === 'user';
+            const textContent = msg.content || msg.text || '';
+            const isTempGeneratingMsg = msg.isGenerating;
 
-              <div className={`msg-bubble ${msg.sender === 'user' ? 'user-bubble' : 'ai-bubble'}`}>
-                <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>{msg.text}</div>
+            return (
+              <div
+                key={msg.id || index}
+                className={`message-row ${isUser ? 'user-row' : ''}`}
+              >
+                <div className={`msg-avatar ${isUser ? 'user-avatar' : 'ai-avatar'}`}>
+                  {isUser ? 'ME' : <Sparkles size={16} />}
+                </div>
 
-                {/* Evidence Verification Badge */}
-                {msg.sender === 'ai' && msg.evidence && (
-                  <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {msg.evidence === 'YES' ? (
-                      <span style={{
-                        fontSize: '11px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        color: '#4ade80',
-                        background: 'rgba(74, 222, 128, 0.1)',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        border: '1px solid rgba(74, 222, 128, 0.2)'
-                      }}>
-                        <CheckCircle2 size={12} />
-                        Evidence Verified in Document
-                      </span>
-                    ) : msg.evidence === 'NO' ? (
-                      <span style={{
-                        fontSize: '11px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        color: '#fbbf24',
-                        background: 'rgba(251, 191, 36, 0.1)',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        border: '1px solid rgba(251, 191, 36, 0.2)'
-                      }}>
-                        <AlertTriangle size={12} />
-                        No Direct Evidence Found in Document
-                      </span>
-                    ) : null}
-                  </div>
-                )}
-
-                {/* Source Citations */}
-                {msg.citations && msg.citations.length > 0 && (
-                  <div className="source-citations-container">
-                    {msg.citations.map((c, i) => (
-                      <div key={i} className="citation-chip">
-                        <FileText size={12} />
-                        <span>{c.doc} {c.page ? `(p. ${c.page})` : ''}</span>
-                        {c.score && <span style={{ fontSize: '10px', opacity: 0.8 }}>• {c.score}</span>}
+                <div className={`msg-bubble ${isUser ? 'user-bubble' : 'ai-bubble'}`}>
+                  <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                    {textContent}
+                    {isTempGeneratingMsg && (
+                      <div style={{ color: '#818cf8', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '8px', marginTop: textContent ? '8px' : '0' }}>
+                        <Loader2 size={16} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
+                        <span>Searching vector embeddings & generating verified answer with Qwen...</span>
                       </div>
-                    ))}
+                    )}
                   </div>
-                )}
 
-                {msg.sender === 'ai' && (
-                  <div className="msg-actions-row">
-                    <Copy
-                      size={13}
-                      className="msg-action-btn"
-                      title="Copy to clipboard"
-                      onClick={() => navigator.clipboard.writeText(msg.text)}
-                    />
-                    <ThumbsUp size={13} className="msg-action-btn" title="Good response" />
-                    <ThumbsDown size={13} className="msg-action-btn" title="Bad response" />
-                    <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#475569' }}>{msg.timestamp}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+                  {/* Evidence Verification Badge */}
+                  {!isUser && !isTempGeneratingMsg && msg.evidence && (
+                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {msg.evidence === 'YES' ? (
+                        <span style={{
+                          fontSize: '11px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          color: '#4ade80',
+                          background: 'rgba(74, 222, 128, 0.1)',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid rgba(74, 222, 128, 0.2)'
+                        }}>
+                          <CheckCircle2 size={12} />
+                          Evidence Verified in Document
+                        </span>
+                      ) : msg.evidence === 'NO' ? (
+                        <span style={{
+                          fontSize: '11px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          color: '#fbbf24',
+                          background: 'rgba(251, 191, 36, 0.1)',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid rgba(251, 191, 36, 0.2)'
+                        }}>
+                          <AlertTriangle size={12} />
+                          No Direct Evidence Found in Document
+                        </span>
+                      ) : null}
+                    </div>
+                  )}
 
-          {isTyping && (
-            <div className="message-row">
-              <div className="msg-avatar ai-avatar">
-                <Sparkles size={16} />
+                  {/* Source Citations */}
+                  {!isUser && !isTempGeneratingMsg && msg.sources && msg.sources.length > 0 && (
+                    <div className="source-citations-container">
+                      {msg.sources.map((c, i) => (
+                        <div key={i} className="citation-chip">
+                          <FileText size={12} />
+                          <span>{c.title || c.chunk_id || 'Document'} {c.page ? `(p. ${c.page})` : ''}</span>
+                          {c.score && <span style={{ fontSize: '10px', opacity: 0.8 }}>• {(c.score * 100).toFixed(1)}% Match</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {!isUser && !isTempGeneratingMsg && (
+                    <div className="msg-actions-row">
+                      <Copy
+                        size={13}
+                        className="msg-action-btn"
+                        title="Copy to clipboard"
+                        onClick={() => navigator.clipboard.writeText(textContent)}
+                      />
+                      <ThumbsUp size={13} className="msg-action-btn" title="Good response" />
+                      <ThumbsDown size={13} className="msg-action-btn" title="Bad response" />
+                      <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#475569' }}>
+                        {msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="msg-bubble ai-bubble" style={{ color: '#818cf8', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Loader2 size={16} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
-                <span>Searching vector embeddings & generating verified answer with Qwen...</span>
-              </div>
-            </div>
-          )}
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
       )}
@@ -416,9 +367,15 @@ const ChatWindow = () => {
             onKeyDown={handleKeyDown}
           />
 
-          <button className="send-msg-btn" onClick={() => handleSend()} disabled={isTyping}>
-            <Send size={16} />
-          </button>
+          {isGenerating ? (
+            <button className="send-msg-btn stop-btn" onClick={stopGeneration} title="Stop Generation" style={{ background: '#ef4444', color: 'white' }}>
+              <Square size={14} fill="currentColor" />
+            </button>
+          ) : (
+            <button className="send-msg-btn" onClick={() => handleSend()}>
+              <Send size={16} />
+            </button>
+          )}
         </div>
 
         <div className="chat-disclaimer-row">

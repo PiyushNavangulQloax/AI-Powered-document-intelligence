@@ -13,6 +13,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { documentService } from '../../services/documentService';
+import { useChat } from '../../context/ChatContext';
 import './Documents.css';
 
 function Documents() {
@@ -77,6 +78,8 @@ function Documents() {
     }
   };
 
+  const { startNewConversation } = useChat();
+
   const handleInspect = async (doc, e) => {
     e.stopPropagation();
     setSelectedDocForInspect(doc);
@@ -94,6 +97,7 @@ function Documents() {
 
   const handleChatWithDoc = (documentId, e) => {
     e.stopPropagation();
+    startNewConversation();
     navigate(`/chat?docId=${documentId}`);
   };
 
@@ -117,8 +121,8 @@ function Documents() {
       {/* Header */}
       <div className="docs-header-bar">
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#ffffff' }}>Document Library</h1>
-          <p style={{ fontSize: '13px', color: '#64748b' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)' }}>Document Library</h1>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
             Upload, index into MongoDB Atlas Vector Search (BAAI/bge-small-en-v1.5), and query with Qwen RAG.
           </p>
         </div>
@@ -138,10 +142,10 @@ function Documents() {
           )}
         </div>
         <div style={{ textAlign: 'center' }}>
-          <span style={{ fontSize: '15px', fontWeight: 700, color: '#f8fafc', display: 'block' }}>
+          <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
             {isUploading ? 'Extracting text & generating 384-d vector embeddings...' : 'Click to upload and index document'}
           </span>
-          <span style={{ fontSize: '12px', color: '#64748b' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
             Supports PDF, DOCX, TXT. Documents are securely vectorized into MongoDB.
           </span>
         </div>
@@ -156,7 +160,7 @@ function Documents() {
       {/* Filter Toolbar */}
       <div className="docs-filter-toolbar">
         <div style={{ position: 'relative', width: '320px' }}>
-          <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+          <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input
             type="text"
             placeholder="Search documents by name..."
@@ -164,12 +168,12 @@ function Documents() {
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
               width: '100%',
-              background: '#0d1321',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-color)',
               borderRadius: '8px',
               padding: '7px 12px 7px 34px',
               fontSize: '12.5px',
-              color: '#f8fafc',
+              color: 'var(--text-primary)',
               outline: 'none'
             }}
           />
@@ -183,9 +187,9 @@ function Documents() {
               style={{
                 padding: '6px 14px',
                 borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: selectedType === type ? 'rgba(99, 102, 241, 0.2)' : '#101625',
-                color: selectedType === type ? '#818cf8' : '#94a3b8',
+                border: '1px solid var(--border-color)',
+                background: selectedType === type ? 'rgba(99, 102, 241, 0.2)' : 'var(--bg-surface-elevated)',
+                color: selectedType === type ? '#818cf8' : 'var(--text-secondary)',
                 fontWeight: 600,
                 fontSize: '12px',
                 cursor: 'pointer'

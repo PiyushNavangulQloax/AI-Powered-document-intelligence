@@ -1,8 +1,22 @@
 import React from 'react';
 import { FileText, Search, Download, Trash2, PlusCircle, Menu } from 'lucide-react';
+import { useChat } from '../../context/ChatContext';
+import { useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
-function Navbar({ onToggleSidebar, activeDocName = 'Q3_Financial_Analysis.pdf', onNewChat }) {
+function Navbar({ onToggleSidebar }) {
+  const { activeDocName, startNewConversation, setMessages } = useChat();
+  const navigate = useNavigate();
+
+  const handleNewChat = () => {
+    startNewConversation();
+    navigate('/chat');
+  };
+
+  const handleClear = () => {
+    setMessages([]);
+  };
+
   return (
     <header className="navbar-header-bar">
       {/* Mobile Menu Toggle */}
@@ -11,12 +25,19 @@ function Navbar({ onToggleSidebar, activeDocName = 'Q3_Financial_Analysis.pdf', 
       </button>
 
       {/* Active Document Pill */}
-      <div className="active-doc-pill">
-        <FileText size={15} style={{ color: '#06b6d4' }} />
-        <span className="active-doc-name">{activeDocName}</span>
-        <span className="file-type-badge">PDF</span>
-        <span className="upload-time-sub">Uploaded 2 minutes ago</span>
-      </div>
+      {activeDocName && activeDocName !== 'All Uploaded Documents' && activeDocName !== 'Select Document' && (
+        <div className="active-doc-pill">
+          <FileText size={15} style={{ color: '#06b6d4' }} />
+          <span className="active-doc-name">{activeDocName}</span>
+        </div>
+      )}
+      
+      {(!activeDocName || activeDocName === 'All Uploaded Documents' || activeDocName === 'Select Document') && (
+        <div className="active-doc-pill" style={{ opacity: 0.7 }}>
+          <FileText size={15} style={{ color: '#94a3b8' }} />
+          <span className="active-doc-name" style={{ color: '#94a3b8' }}>Global Search</span>
+        </div>
+      )}
 
       {/* Search Bar */}
       <div className="header-search-box">
@@ -31,11 +52,11 @@ function Navbar({ onToggleSidebar, activeDocName = 'Q3_Financial_Analysis.pdf', 
           <Download size={14} />
           <span>Export</span>
         </button>
-        <button className="header-btn-secondary">
+        <button className="header-btn-secondary" onClick={handleClear}>
           <Trash2 size={14} />
           <span>Clear</span>
         </button>
-        <button className="header-btn-primary" onClick={onNewChat}>
+        <button className="header-btn-primary" onClick={handleNewChat}>
           <PlusCircle size={14} />
           <span>New Chat</span>
         </button>

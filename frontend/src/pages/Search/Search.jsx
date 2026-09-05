@@ -47,8 +47,8 @@ const Search = () => {
   return (
     <div className="search-page-container">
       <div>
-        <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#ffffff' }}>Semantic Vector Search</h1>
-        <p style={{ fontSize: '13px', color: '#64748b' }}>Search indexed document chunks using cosine similarity embeddings across your knowledge base.</p>
+        <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)' }}>Semantic Vector Search</h1>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Search indexed document chunks using cosine similarity embeddings across your knowledge base.</p>
       </div>
 
       {/* Hero Query Box */}
@@ -97,7 +97,7 @@ const Search = () => {
 
       {/* Search Results List */}
       <div className="search-results-stack">
-        <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>
+        <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600 }}>
           FOUND {MOCK_SEARCH_RESULTS.length} HIGH-CONFIDENCE SEMANTIC MATCHES
         </span>
 
@@ -106,8 +106,8 @@ const Search = () => {
             <div className="result-card-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <FileText size={16} style={{ color: '#38bdf8' }} />
-                <span style={{ fontWeight: 700, color: '#f8fafc', fontSize: '14px' }}>{res.docName}</span>
-                <span style={{ fontSize: '12px', color: '#64748b' }}>• Page {res.page}</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '14px' }}>{res.docName}</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>• Page {res.page}</span>
               </div>
               <span className="sim-score-tag">{res.score} Cosine Match</span>
             </div>

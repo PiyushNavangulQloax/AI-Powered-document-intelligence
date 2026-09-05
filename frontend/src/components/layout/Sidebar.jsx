@@ -1,44 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  Layers,
-  Plus,
-  ChevronDown,
-  RotateCw,
-  Search,
-  FileText,
-  MessageSquare,
-  LayoutDashboard,
-  Files,
-  Compass,
-  Settings,
-  LogOut,
-  X
+  Layers, Plus, ChevronDown, RotateCw, Search,
+  FileText, MessageSquare, LayoutDashboard, Files,
+  Compass, Settings, LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useChat } from '../../context/ChatContext';
+import { documentService } from '../../services/documentService';
+import { chatService } from '../../services/chatService';
 import './Sidebar.css';
 
 function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { startNewConversation, loadConversation, currentConversationId, activeDocName, setActiveDocName } = useChat();
+  
   const [docSearch, setDocSearch] = useState('');
-  const [selectedDoc, setSelectedDoc] = useState('Q3_Financial_Analysis.pdf');
   const [selectedModel, setSelectedModel] = useState('QLOXA DeepSIG 4.0 (Trial)');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  
+  const [activeDocuments, setActiveDocuments] = useState([]);
+  const [recentConversations, setRecentConversations] = useState([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const activeDocuments = [
-    { id: '1', name: 'Q3_Financial_Analysis.pdf', type: 'pdf' },
-    { id: '2', name: 'Vendor_Contract_v4.docx', type: 'docx' },
-    { id: '3', name: 'Architecture_Design_Doc...', type: 'pdf' },
-    { id: '4', name: 'Security_Audit.xlsx', type: 'xlsx' },
-    { id: '5', name: 'Employee_Handbook_2026.pdf', type: 'pdf' }
-  ];
+  useEffect(() => {
+    fetchSidebarData();
+  }, [currentConversationId]); // Refresh when a conversation changes
 
-  const recentConversations = [
-    { id: 'c1', title: 'Q3 Revenue & Growth Analysis', active: true },
-    { id: 'c2', title: 'Vendor Contract Risk Audit', active: false },
-    { id: 'c3', title: 'System Architecture Security', active: false }
-  ];
+  const fetchSidebarData = async () => {
+    setIsRefreshing(true);
+    try {
+      const [docs, chats] = await Promise.all([
+        documentService.getDocuments(),
+        chatService.getConversations().catch(() => ({ conversations: [] }))
+      ]);
+      setActiveDocuments(docs || []);
+      setRecentConversations(chats.conversations || []);
+    } catch (err) {
+      console.error('Failed to fetch sidebar data', err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const models = [
     'QLOXA DeepSIG 4.0 (Trial)',
@@ -55,10 +59,18 @@ function Sidebar({ isOpen, onClose }) {
     { to: '/chat', label: 'AI Chat & RAG', icon: MessageSquare },
     { to: '/dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
     { to: '/documents', label: 'Document Library', icon: Files },
-    { to: '/search', label: 'Semantic Vector Search', icon: Compass }
+    { to: '/search', label: 'Semantic Vector Search', icon: Compass },
+    { to: '/settings', label: 'Settings', icon: Settings }
   ];
 
   const handleNewAnalysis = () => {
+    startNewConversation();
+    navigate('/chat');
+    if (onClose) onClose();
+  };
+
+  const handleSelectConversation = (convId) => {
+    loadConversation(convId);
     navigate('/chat');
     if (onClose) onClose();
   };
@@ -68,7 +80,7 @@ function Sidebar({ isOpen, onClose }) {
       {/* Brand Header */}
       <div className="sidebar-header">
         <div className="sidebar-logo-icon">
-          <Layers size={20} />
+          <img src="/logo.png" alt="DocMind AI Logo" className="sidebar-logo-img" />
         </div>
         <div className="sidebar-brand-info">
           <div className="sidebar-brand-title">
@@ -154,7 +166,7 @@ function Sidebar({ isOpen, onClose }) {
       <div className="sidebar-section">
         <div className="section-label-row">
           <span>ACTIVE DOCUMENTS ({activeDocuments.length})</span>
-          <RotateCw size={12} className="refresh-icon" />
+          <RotateCw size={12} className={`refresh-icon ${isRefreshing ? 'spinning' : ''}`} onClick={fetchSidebarData} />
         </div>
 
         <div className="doc-search-box">
@@ -170,11 +182,11 @@ function Sidebar({ isOpen, onClose }) {
         <div className="doc-list">
           {filteredDocs.map((doc) => (
             <div
-              key={doc.id}
-              className={`doc-item ${selectedDoc === doc.name ? 'active' : ''}`}
-              onClick={() => setSelectedDoc(doc.name)}
+              key={doc.document_id}
+              className={`doc-item ${activeDocName === doc.name ? 'active' : ''}`}
+              onClick={() => setActiveDocName(doc.name)}
             >
-              <FileText size={14} style={{ color: doc.type === 'pdf' ? '#06b6d4' : doc.type === 'docx' ? '#6366f1' : '#10b981' }} />
+              <FileText size={14} style={{ color: doc.type === 'PDF' ? '#06b6d4' : doc.type === 'DOCX' ? '#6366f1' : '#10b981' }} />
               <span className="doc-name">{doc.name}</span>
               <span className="status-dot-green" />
             </div>
@@ -188,11 +200,14 @@ function Sidebar({ isOpen, onClose }) {
           <span>RECENT CONVERSATIONS</span>
         </div>
         <div className="chat-list">
+          {recentConversations.length === 0 && (
+            <div style={{ padding: '10px', fontSize: '12px', color: '#64748b' }}>No recent chats.</div>
+          )}
           {recentConversations.map((chat) => (
             <div
               key={chat.id}
-              className={`chat-item ${chat.active ? 'active' : ''}`}
-              onClick={() => navigate('/chat')}
+              className={`chat-item ${currentConversationId === chat.id ? 'active' : ''}`}
+              onClick={() => handleSelectConversation(chat.id)}
             >
               <MessageSquare size={14} style={{ color: '#818cf8' }} />
               <span className="doc-name">{chat.title}</span>
@@ -213,7 +228,6 @@ function Sidebar({ isOpen, onClose }) {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Settings size={16} className="gear-icon-btn" onClick={() => navigate('/dashboard')} title="Dashboard Settings" />
           <LogOut
             size={16}
             className="gear-icon-btn"

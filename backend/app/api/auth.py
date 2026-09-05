@@ -39,6 +39,10 @@ class ResetPassword(BaseModel):
     code: str
     new_password: str
 
+class ChangePassword(BaseModel):
+    current_password: str
+    new_password: str
+
 # --- Dependencies ---
 def get_current_user(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
@@ -186,3 +190,22 @@ async def reset_password(data: ResetPassword):
     db.password_reset_tokens.delete_many({"email": data.email})
     
     return {"message": "Password changed successfully. Please log in with your new password."}
+
+@router.post("/change-password")
+async def change_password(data: ChangePassword, current_user: dict = Depends(get_current_user)):
+    db = get_db()
+    hashed_password = current_user.get("password") or current_user.get("password_hash")
+    
+    if not hashed_password or not verify_password(data.current_password, hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect current password.")
+        
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters.")
+        
+    new_hashed_pwd = get_password_hash(data.new_password)
+    db.users.update_one(
+        {"email": current_user["email"]},
+        {"$set": {"password": new_hashed_pwd}}
+    )
+    
+    return {"message": "Password changed successfully."}
