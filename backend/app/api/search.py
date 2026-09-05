@@ -9,7 +9,7 @@ router = APIRouter(dependencies=[Depends(get_current_user)])
 class SearchRequest(BaseModel):
     query: str
     document_id: Optional[str] = None
-    top_k: Optional[int] = 3
+    top_k: Optional[int] = 10
 
 class SearchResponse(BaseModel):
     results: List[Dict[str, Any]]
@@ -20,7 +20,7 @@ def search_documents(request: SearchRequest):
         results = search_service.vector_search(
             query=request.query,
             document_id=request.document_id,
-            top_k=request.top_k
+            top_k=request.top_k or 10
         )
         return SearchResponse(results=results)
     except Exception as e:

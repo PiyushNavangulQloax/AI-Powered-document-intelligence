@@ -79,8 +79,8 @@ function Register() {
         {/* Right Side Register Form Card */}
         <div className="login-card-container">
           <div className="login-brand-header">
-            <div className="login-logo-icon">
-              <Layers size={24} />
+            <div className="login-logo-icon" style={{ background: 'transparent', boxShadow: 'none' }}>
+              <img src="/logo.png" alt="QLOXA AI Logo" style={{ width: '44px', height: '44px', objectFit: 'contain', filter: 'drop-shadow(0 2px 10px rgba(6, 182, 212, 0.45))' }} />
             </div>
             <div>
               <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#fff' }}>

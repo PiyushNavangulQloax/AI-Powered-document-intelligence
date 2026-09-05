@@ -24,8 +24,8 @@
 }
 
 .pulsing-logo-circle {
-  width: 76px;
-  height: 76px;
+  width: 92px;
+  height: 92px;
   background: transparent;
   border: none;
   display: flex;
@@ -35,10 +35,16 @@
 }
 
 .chat-landing-logo-img {
-  width: 76px;
-  height: 76px;
+  width: 92px;
+  height: 92px;
   object-fit: contain;
-  filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.5));
+  filter: drop-shadow(0 4px 24px rgba(6, 182, 212, 0.6));
+  animation: floatChatLogo 3s ease-in-out infinite;
+}
+
+@keyframes floatChatLogo {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
 }
 
 .chat-landing-title {

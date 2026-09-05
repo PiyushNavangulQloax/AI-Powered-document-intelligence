@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import {
   BarChart3, FileCheck, HelpCircle, Star, ArrowRight,
   Paperclip, Send, ShieldCheck, Copy, ThumbsUp, ThumbsDown,
@@ -46,6 +46,7 @@ const DEFAULT_TEMPLATES = [
 
 const ChatWindow = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const docIdFromUrl = searchParams.get('docId');
 
   const {
@@ -80,6 +81,16 @@ const ChatWindow = () => {
     };
     fetchDocs();
   }, [docIdFromUrl, setActiveDocName]);
+
+  // Handle prefilled prompt from Semantic Vector Search
+  useEffect(() => {
+    if (location.state?.initialPrompt) {
+      setInputValue(location.state.initialPrompt);
+      if (location.state?.docName) {
+        setActiveDocName(location.state.docName);
+      }
+    }
+  }, [location.state, setActiveDocName]);
 
   // Derive the active document object from the global activeDocName
   const activeDoc = documents.find((d) => d.name === activeDocName);
